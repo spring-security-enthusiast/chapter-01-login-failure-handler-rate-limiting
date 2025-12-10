@@ -22,7 +22,8 @@
                 </span>
                     <h1 class="card-title">Sign in to your account</h1>
                     <p class="card-subtitle">
-                        Use the demo credentials to simulate a real online banking login.
+                        Use the demo credentials to observe how Spring Security processes
+                        authentication success and failure.
                     </p>
                 </header>
                 <div class="auth-main">
@@ -61,7 +62,7 @@
                                        name="username"
                                        placeholder="e.g. admin"
                                        autocomplete="username"
-                                       value="admin" />
+                                       value="john" />
                             </div>
                             <div class="hint">
                                 For this demo, the username is <code>admin</code>.
@@ -104,17 +105,17 @@
                         <b>How this demo works:</b><br />
                         This login form submits credentials to
                         <code>/auth/login_processing</code>.
-                        After a successful login, Spring Security executes a custom
-                        <code>successHandler</code>, which <b>forwards</b> the same
-                        <code>POST</code> request internally to
-                        <code>/customSuccessPage</code>.
+                        Spring Security authenticates the request and then chooses
+                        <em>one of two paths</em>: a failure path handled by an
+                        <code>AuthenticationFailureHandler</code>, or a success path
+                        handled by an <code>AuthenticationSuccessHandler</code>.
                     </div>
 
                     <div class="footer-note">
-                        Try logging in and observe what happens:
-                        the browser URL stays the same, but the view changes.
-                        This means the request was forwarded internally,
-                        not redirected to a new URL.
+                        Try both valid and invalid credentials and observe the difference:
+                        failed authentication results in a redirect back to this page,
+                        while successful authentication continues internally without
+                        changing the browser URL.
                     </div>
                 </div>
             </section>

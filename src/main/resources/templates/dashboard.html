@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head th:replace="~{fragment/template :: defaultHead('Spring Security Bank – Welcome')}"></head>
+<body>
+<div class="layout">
+    <!-- Private topbar with username -->
+    <header th:replace="~{fragment/template :: topbarPrivate(${username})}"></header>
+
+    <!-- Main content -->
+    <main class="main">
+        <section class="page-header" th:replace="~{fragment/template :: subnavigation(${username})}">
+
+        </section>
+
+
+        <section class="grid">
+            <!-- Left: Account overview -->
+            <article class="card">
+                <div class="card-header">
+                    <h2>Account overview</h2>
+                    <span class="label-pill">Sample data · Demo only</span>
+                </div>
+
+                <ul class="account-list">
+                    <li class="account-item">
+                        <div class="account-meta">
+                            <span class="account-name">Everyday Savings</span>
+                            <span class="account-number">Account • XXXX-1234</span>
+                        </div>
+                        <div class="account-balance balance-positive">
+                            $ 12,345.67
+                        </div>
+                    </li>
+                    <li class="account-item">
+                        <div class="account-meta">
+                            <span class="account-name">Current Account</span>
+                            <span class="account-number">Account • XXXX-5678</span>
+                        </div>
+                        <div class="account-balance">
+                            $ 4,200.00
+                        </div>
+                    </li>
+                    <li class="account-item">
+                        <div class="account-meta">
+                            <span class="account-name">Credit Card</span>
+                            <span class="account-number">Card • XXXX-9012</span>
+                        </div>
+                        <div class="account-balance" style="color:#ea580c;">
+                            - $ 1,250.00
+                        </div>
+                    </li>
+                </ul>
+
+                <p class="panel-note">
+                    This is just a demo view. In a real banking app, this controller could:
+                    <br />
+                    - Load accounts for <code th:text="${username}">admin</code> from the database<br />
+                    - Run extra risk checks or logging<br />
+                    - Prepare a personalized “after login” view
+                    — all within the same forwarded login <code>POST</code> request.
+                </p>
+            </article>
+
+            <!-- Right column: two stacked cards -->
+            <div class="stack-column">
+                <aside class="card security-card">
+                    <div class="card-header">
+                        <h2>Security details</h2>
+                    </div>
+                    <p class="panel-note">
+                        For this session:
+                        <br />
+                        - IP Address:
+                        <code th:text="${ipAddress}">127.0.0.1</code>
+                        <br />
+                        - Browser (User-Agent):
+                        <code th:text="${userAgent}">Mozilla/5.0 ...</code>
+                    </p>
+
+                </aside>
+
+                <aside class="card security-card">
+                    <div class="card-header">
+                        <h2>Security &amp; session info</h2>
+                    </div>
+
+                    <p>
+                        In this demo, you arrived at this page via a
+                        <code>successHandler</code> forwarding behavior).
+                        or an equivalent <code>successForwardUrl("/customSuccessPage")</code> forwarding behavior.
+                    </p>
+
+                    <ul class="security-list">
+                        <li>
+                            The browser URL still shows
+                            <code>/auth/login_processing</code>,
+                            because no redirect occurred.
+                        </li>
+                        <li>
+                            The same HTTP <code>POST</code> request that submitted the login form
+                            is now rendering this page.
+                        </li>
+                        <li>
+                            The authenticated user is available via
+                            <code>Principal</code> and the
+                            <code>SecurityContext</code>.
+                        </li>
+                    </ul>
+
+                    <p class="warn">
+                        ⚠️ Important:
+                        Refreshing this page may cause the browser to re-submit
+                        the original login <code>POST</code> request.
+                    </p>
+
+                    <p>
+                        In most real-world dashboards, you would typically use
+                        <code>defaultSuccessUrl("/home")</code> (a redirect)
+                        to follow the Post-Redirect-Get (PRG) pattern instead.
+                    </p>
+                </aside>
+
+
+            </div>
+        </section>
+
+
+
+        <section class="footer">
+            <div>
+                You are logged in as
+                <strong th:text="${username}">admin</strong>.
+                This is a simulated banking welcome page used to demonstrate
+                <code>successForwardUrl()</code>.
+            </div>
+            <div>
+                Try changing the configuration to
+                <code>defaultSuccessUrl("/home")</code> and observe how
+                URL, history & refresh behavior change.
+            </div>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragment/template :: footer}"></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head th:replace="~{fragment/template :: defaultHead('Spring Security Bank – Welcome')}"></head>
+<body>
+<div class="layout">
+
+    <!-- Private topbar with username -->
+    <header th:replace="~{fragment/template :: topbarPrivate(${username})}"></header>
+
+    <main class="main">
+
+        <section class="page-header"
+                 th:replace="~{fragment/template :: subnavigation(${username})}">
+        </section>
+
+        <section class="card">
+            <header class="card-header">
+                <h2>Home (forward-based landing page)</h2>
+                <span class="label-pill">/customSuccessPage · successHandler (forward)</span>
+            </header>
+
+            <p style="font-size:0.95rem; color:#6b7280;">
+                In this demo, you arrive at this page via a custom
+                <code>successHandler(...)</code>.
+                After successful authentication, Spring Security calls your handler,
+                which uses
+                <code>request.getRequestDispatcher("/customSuccessPage").forward(request, response)</code>
+                to <strong>forward</strong> the original login
+                <code>POST</code> request to this view.
+            </p>
+
+            <hr style="margin:1rem 0;" />
+
+            <h3 style="font-size:1rem; margin-bottom:0.4rem;">
+                What this means for the browser
+            </h3>
+
+            <ul style="font-size:0.9rem; color:#4b5563; padding-left:1.2rem; margin-top:0.35rem;">
+                <li>
+                    The browser URL still points to
+                    <code>/auth/login_processing</code>
+                    (or whatever your login processing URL is) —
+                    it does <strong>not</strong> change to
+                    <code>/customSuccessPage</code>.
+                </li>
+                <li>
+                    The same HTTP <code>POST</code> that submitted your login form
+                    is now rendering this page via an internal forward.
+                </li>
+                <li>
+                    The authenticated user is available via
+                    <code>Principal</code> and the
+                    <code>SecurityContext</code>, just like with redirect-based flows.
+                </li>
+            </ul>
+
+            <p class="warn" style="font-size:0.9rem; color:#b91c1c; margin-top:0.75rem;">
+                ⚠️ Important:
+                If the user refreshes this page, the browser may attempt to
+                re-submit the original login <code>POST</code> request
+                (you may see a “Confirm form resubmission” dialog).
+                This is a side effect of using a forward after a form POST.
+            </p>
+
+            <hr style="margin:1rem 0;" />
+
+            <h3 style="font-size:1rem; margin-bottom:0.4rem;">
+                How this differs from <code>defaultSuccessUrl()</code>
+            </h3>
+
+            <ul style="font-size:0.9rem; color:#4b5563; padding-left:1.2rem; margin-top:0.35rem;">
+                <li>
+                    With <code>defaultSuccessUrl("/home")</code>,
+                    Spring Security sends a real
+                    <code>302</code> redirect and the browser issues
+                    a new <code>GET /home</code> request.
+                </li>
+                <li>
+                    The URL bar clearly shows <code>/home</code>,
+                    which is safe to refresh, bookmark, and share.
+                    There is no form re-submission on refresh.
+                </li>
+                <li>
+                    With this <code>successHandler + forward</code> approach,
+                    the URL stays on the login processing endpoint and refresh
+                    can re-submit the form.
+                </li>
+            </ul>
+
+            <hr style="margin:1rem 0;" />
+
+            <h3 style="font-size:1rem; margin-bottom:0.4rem;">Things you can try</h3>
+            <ol style="font-size:0.9rem; color:#4b5563; padding-left:1.2rem; margin-top:0.35rem;">
+                <li>
+                    Log in with <code>admin/password</code> and watch how the URL
+                    stays on the login processing path while this “home” view is shown.
+                </li>
+                <li>
+                    Hit refresh on this page and observe whether your browser warns
+                    about re-submitting the form.
+                </li>
+                <li>
+                    Switch the configuration to use
+                    <code>defaultSuccessUrl("/home")</code> instead,
+                    log in again, and compare the URL and refresh behavior.
+                </li>
+            </ol>
+
+            <p style="font-size:0.85rem; color:#6b7280; margin-top:1rem;">
+                Tip:
+                Use this demo to “feel” the difference between a
+                <b>forward-based</b> landing page via
+                <code>successHandler</code> and a
+                <b>redirect-based</b> landing page via
+                <code>defaultSuccessUrl("/home")</code>.
+            </p>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragment/template :: footer}"></footer>
+</div>
+</body>
+</html>

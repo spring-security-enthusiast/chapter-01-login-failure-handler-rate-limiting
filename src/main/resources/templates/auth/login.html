@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="https://www.thymeleaf.org"
+      lang="en">
+<head th:replace="~{fragment/template :: authHead('Spring Security Bank – Login')}"></head>
+<body>
+<div class="layout">
+    <!-- Top bar -->
+    <header th:replace="~{fragment/template :: topbarPublic}"></header>
+
+    <!-- Login + Flow layout -->
+    <main class="main">
+        <div class="auth-layout">
+            <!-- LEFT -->
+
+
+            <section class="card">
+                <header class="card-header">
+                <span class="env-pill">
+                    <span class="env-dot"></span>
+                    Login · Forward flow
+                </span>
+                    <h1 class="card-title">Sign in to your account</h1>
+                    <p class="card-subtitle">
+                        Use the demo credentials to simulate a real online banking login.
+                    </p>
+                </header>
+                <div class="auth-main">
+                    <!-- Global error based on param.error / SPRING_SECURITY_LAST_EXCEPTION -->
+                    <div class="error-block" th:if="${loginErrorMessage != null}">
+                        <div class="alert-error" th:text="${loginErrorMessage}">
+                            <strong>Login failed.</strong>
+                        </div>
+
+                        <!-- 🔽 Only shown when we have a lock -->
+                        <div class="mt-3 small text-warning"
+                             th:if="${lockUntilEpochMillis != null}"
+                             id="lock-countdown"
+                             th:attr="data-lock-until-ms=${lockUntilEpochMillis}">
+                            Please wait
+                            <strong>
+                                <span id="lock-countdown-value"
+                                      th:text="${lockRemainingSeconds}">60</span>
+                                seconds
+                            </strong>
+                            before trying again.
+                        </div>
+                    </div>
+
+                    <form th:action="@{/auth/login_processing}" method="post">
+                        <!-- CSRF token (if enabled) -->
+                        <input type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}" />
+
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <div class="input-wrapper">
+                                <input type="text"
+                                       id="username"
+                                       name="username"
+                                       placeholder="e.g. admin"
+                                       autocomplete="username"
+                                       value="admin" />
+                            </div>
+                            <div class="hint">
+                                For this demo, the username is <code>admin</code>.
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <div class="input-wrapper">
+                                <input type="password"
+                                       id="password"
+                                       name="password"
+                                       placeholder="Enter your password"
+                                       autocomplete="current-password"
+                                       value="password" />
+                            </div>
+                            <div class="hint">
+                                Demo password is <code>password</code>.
+                            </div>
+                        </div>
+
+                        <div class="actions-row">
+                            <div class="actions-button-row">
+                                <button id="login-submit-btn"
+                                        class="btn btn-primary w-100"
+                                        type="submit">
+                                    <span>Log in</span>
+                                    <span>→</span>
+                                </button>
+                            </div>
+
+                            <div class="demo-tag-row">
+                                <span class="demo-tag-label">Demo user:</span>
+                                <code>admin/password</code>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="demo-hint-box">
+                        <b>How this demo works:</b><br />
+                        This login form submits credentials to
+                        <code>/auth/login_processing</code>.
+                        After a successful login, Spring Security executes a custom
+                        <code>successHandler</code>, which <b>forwards</b> the same
+                        <code>POST</code> request internally to
+                        <code>/customSuccessPage</code>.
+                    </div>
+
+                    <div class="footer-note">
+                        Try logging in and observe what happens:
+                        the browser URL stays the same, but the view changes.
+                        This means the request was forwarded internally,
+                        not redirected to a new URL.
+                    </div>
+                </div>
+            </section>
+            <!-- RIGHT -->
+            <aside class="auth-track-panel">
+                <h2 class="auth-track-title">Authentication “train line”</h2>
+                <p class="auth-track-intro">
+                    Imagine your login request as a train passing through a series
+                    of stations. After a few core stops, the track splits into
+                    a <strong>failure line</strong> and a <strong>success line</strong>.
+                </p>
+
+                <div class="track-map">
+                    <!-- COMMON LINE (before branching) -->
+                    <div class="track-column track-column-main">
+                        <div class="track-stop">
+                            <div class="track-line"></div>
+                            <div class="track-dot"></div>
+                            <div class="track-label">
+                                <strong>Browser</strong><br />
+                                <code>POST /auth/login_processing</code>
+                            </div>
+                        </div>
+
+                        <div class="track-stop">
+                            <div class="track-line"></div>
+                            <div class="track-dot"></div>
+                            <div class="track-label">
+                                <code>UsernamePasswordAuthenticationFilter</code><br />
+                                Builds a <code>UsernamePasswordAuthenticationToken</code>
+                                and calls the <code>AuthenticationManager</code>.
+                            </div>
+                        </div>
+
+                        <div class="track-stop">
+                            <div class="track-line"></div>
+                            <div class="track-dot"></div>
+                            <div class="track-label">
+                                <code>AuthenticationManager</code><br />
+                                Delegates to one or more
+                                <code>AuthenticationProvider</code> instances.
+                            </div>
+                        </div>
+
+                        <!-- Branch junction -->
+                        <div class="track-junction">
+                            <div class="track-line track-line-down"></div>
+                            <div class="track-dot track-dot-junction"></div>
+                            <div class="track-label">
+                                Decision: credentials valid?
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BRANCH LINES -->
+                    <div class="track-branches">
+                        <!-- FAILURE BRANCH -->
+                        <div class="track-column track-column-branch track-branch-failure"
+                             th:classappend="${loginErrorMessage != null} ? ' track-branch-active'">
+                            <div class="branch-header">
+                                <span class="branch-title">Failure line</span>
+                                <span class="branch-tag"
+                                      th:if="${loginErrorMessage != null}">
+                                        (current)
+                                    </span>
+                            </div>
+
+                            <div class="track-stop">
+                                <div class="track-line"></div>
+                                <div class="track-dot"></div>
+                                <div class="track-label">
+                                    <code>AuthenticationFailureHandler</code><br />
+                                    Updates rate-limit counters and chooses
+                                    <code>/auth/login?error</code> as the target.
+                                </div>
+                            </div>
+
+                            <div class="track-stop">
+                                <div class="track-line"></div>
+                                <div class="track-dot"></div>
+                                <div class="track-label">
+                                    <strong>Server → Browser</strong><br />
+                                    Sends <code>302 Redirect</code> to
+                                    <code>/auth/login?error</code>.
+                                </div>
+                            </div>
+
+                            <div class="track-stop">
+                                <div class="track-line"></div>
+                                <div class="track-dot"></div>
+                                <div class="track-label">
+                                    <strong>Browser</strong><br />
+                                    Issues a new
+                                    <code>GET /auth/login?error</code> request.
+                                </div>
+                            </div>
+
+                            <div class="track-stop track-stop-end">
+                                <div class="track-line track-line-end"></div>
+                                <div class="track-dot track-dot-end"></div>
+                                <div class="track-label">
+                                    <strong>Login page</strong><br />
+                                    This template renders again, showing the
+                                    error message on the left.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SUCCESS BRANCH -->
+                        <div class="track-column track-column-branch track-branch-success">
+                            <div class="branch-header">
+                                <span class="branch-title">Success line</span>
+                            </div>
+
+                            <div class="track-stop">
+                                <div class="track-line"></div>
+                                <div class="track-dot"></div>
+                                <div class="track-label">
+                                    <code>SessionAuthenticationStrategy</code><br />
+                                    Applies session fixation protection rules.
+                                </div>
+                            </div>
+
+                            <div class="track-stop">
+                                <div class="track-line"></div>
+                                <div class="track-dot"></div>
+                                <div class="track-label">
+                                    <code>SecurityContextHolder</code> &amp;
+                                    <code>SecurityContextRepository</code><br />
+                                    Store the authenticated user in the security context.
+                                </div>
+                            </div>
+
+                            <div class="track-stop">
+                                <div class="track-line"></div>
+                                <div class="track-dot"></div>
+                                <div class="track-label">
+                                    <code>RememberMeServices</code> (optional) &amp;
+                                    <code>ApplicationEventPublisher</code><br />
+                                    Handle “remember me” cookies and publish
+                                    authentication events.
+                                </div>
+                            </div>
+
+                            <div class="track-stop track-stop-end">
+                                <div class="track-line track-line-end"></div>
+                                <div class="track-dot track-dot-end"></div>
+                                <div class="track-label">
+                                    <code>AuthenticationSuccessHandler</code><br />
+                                    In this demo, forwards to
+                                    <code>/customSuccessPage</code>
+                                    which renders the “/home” view.
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- /.track-branches -->
+                </div> <!-- /.track-map -->
+
+                <p class="auth-track-note">
+                    When you click <strong>Log in</strong>, your request travels along
+                    this “line”. For invalid credentials, you stay on the
+                    <em>failure track</em> and return to this page. For valid
+                    credentials, the train continues on the <em>success track</em>
+                    into the authenticated area of the application.
+                </p>
+            </aside>
+        </div>
+
+
+    </main>
+
+    <footer th:replace="~{fragment/template :: footer}"></footer>
+
+    <!-- Countdown script for locked state -->
+    <script>
+        (function() {
+            const countdownEl = document.getElementById('lock-countdown');
+            if (!countdownEl) {
+                return; // Not locked, nothing to do
+            }
+
+            const lockUntilMs = parseInt(countdownEl.getAttribute('data-lock-until-ms') || '0', 10);
+            if (!lockUntilMs || isNaN(lockUntilMs)) {
+                return;
+            }
+
+            const valueEl = document.getElementById('lock-countdown-value');
+            const submitBtn = document.getElementById('login-submit-btn');
+
+            // Optional: disable submit while locked
+            if (submitBtn) {
+                submitBtn.disabled = true;
+            }
+
+            function updateCountdown() {
+                const now = Date.now();
+                const remainingMs = lockUntilMs - now;
+                const remainingSeconds = Math.ceil(remainingMs / 1000);
+
+                if (remainingSeconds <= 0) {
+                    if (valueEl) {
+                        valueEl.textContent = '0';
+                    }
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                    }
+                    // Optional: auto-refresh to clear ?error=locked from URL
+                    // window.location.href = window.location.pathname;
+                    clearInterval(timerId);
+                    return;
+                }
+
+                if (valueEl) {
+                    valueEl.textContent = remainingSeconds.toString();
+                }
+            }
+
+            // Initial draw + interval
+            updateCountdown();
+            const timerId = setInterval(updateCountdown, 1000);
+        })();
+    </script>
+
+</div>
+</body>
+</html>

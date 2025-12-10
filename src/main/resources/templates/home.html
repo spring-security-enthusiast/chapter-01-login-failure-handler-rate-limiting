@@ -60,7 +60,8 @@
                 If the user refreshes this page, the browser may attempt to
                 re-submit the original login <code>POST</code> request
                 (you may see a “Confirm form resubmission” dialog).
-                This is a side effect of using a forward after a form POST.
+                This is a natural side effect of using a forward directly after a form
+                <code>POST</code>, instead of the usual redirect pattern.
             </p>
 
             <hr style="margin:1rem 0;" />
@@ -79,12 +80,13 @@
                 <li>
                     The URL bar clearly shows <code>/home</code>,
                     which is safe to refresh, bookmark, and share.
-                    There is no form re-submission on refresh.
+                    There is no form re-submission on refresh
+                    (the classic <em>POST-Redirect-GET</em> pattern).
                 </li>
                 <li>
                     With this <code>successHandler + forward</code> approach,
                     the URL stays on the login processing endpoint and refresh
-                    can re-submit the form.
+                    can re-submit the login form.
                 </li>
             </ul>
 
@@ -110,7 +112,7 @@
             <p style="font-size:0.85rem; color:#6b7280; margin-top:1rem;">
                 Tip:
                 Use this demo to “feel” the difference between a
-                <b>forward-based</b> landing page via
+                <b>forward-based</b> landing page via a custom
                 <code>successHandler</code> and a
                 <b>redirect-based</b> landing page via
                 <code>defaultSuccessUrl("/home")</code>.

@@ -16,10 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.WebAttributes;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.*;
 
 import java.time.Duration;
 
@@ -53,7 +50,7 @@ public class SecurityConfig {
             .formLogin(formLogin -> formLogin
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/auth/login_processing")
-                .successHandler(loginSuccessHandler())
+                .successHandler(clearRateLimitSuccessHandler())
                 .failureHandler(rateLimitingFailureHandler())
                 .permitAll()
             )
@@ -127,17 +124,27 @@ public class SecurityConfig {
 
 
     /**
-     * Clears rate limiting counters after successful authentication.
-     * This ensures users can retry immediately after a successful login.
+     * Clears rate limiting counters after successful authentication
+     * and then delegates to another {@link AuthenticationSuccessHandler}.
      *
-     * Note: For simplicity, this handler always redirects to "/home"
-     * instead of the originally requested URL.
+     * In this demo, the delegate can be either:
+     * - a redirect-based handler (e.g. {@code SimpleUrlAuthenticationSuccessHandler})
+     * - or a forward-based handler (e.g. {@code ForwardAuthenticationSuccessHandler})
+     *
+     * This ensures users get a "fresh start" after login, while you stay free
+     * to choose the redirect vs forward behavior you prefer.
      */
     @Bean
-    public AuthenticationSuccessHandler loginSuccessHandler() {
-        SimpleUrlAuthenticationSuccessHandler base =
-                new SimpleUrlAuthenticationSuccessHandler("/home");
-        return new ClearRateLimitSuccessHandler(base);
+    public AuthenticationSuccessHandler clearRateLimitSuccessHandler() {
+        // Option 1 – redirect-based (POST-Redirect-GET)
+        // AuthenticationSuccessHandler delegate =
+        //        new SimpleUrlAuthenticationSuccessHandler("/home");
+
+        // Option 2 – forward-based (matches this chapter's /customSuccessPage demo)
+        AuthenticationSuccessHandler delegate =
+                new ForwardAuthenticationSuccessHandler("/customSuccessPage");
+
+        return new ClearRateLimitSuccessHandler(delegate);
     }
 
 }
